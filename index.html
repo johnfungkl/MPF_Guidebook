@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide: MPF Registration for Student Helpers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Step transition styles */
+        .step {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .hidden-step {
+            opacity: 0;
+            transform: scale(0.95);
+            position: absolute;
+            pointer-events: none;
+        }
+        .visible-step {
+            opacity: 1;
+            transform: scale(1);
+        }
+        /* Styles for the image zoom modal */
+        .guide-image {
+            cursor: zoom-in;
+        }
+        .image-modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            padding-top: 50px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.85);
+            transition: opacity 0.3s ease;
+        }
+        .image-modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90vh;
+        }
+        .image-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-blue-800 text-white p-6">
+            <h1 class="text-2xl md:text-3xl font-bold">Student Helper MPF Registration Guide</h1>
+            <p class="mt-2 text-blue-200">A step-by-step guide to submitting your information.</p>
+        </div>
+
+        <div id="guide-container" class="relative p-6 md:p-8 min-h-[400px]">
+            <!-- Steps will be injected here by JavaScript -->
+        </div>
+
+        <div class="bg-gray-50 p-6 flex justify-between items-center border-t border-gray-200">
+            <div>
+                <span id="step-counter" class="text-sm font-medium text-gray-600"></span>
+            </div>
+            <div class="flex gap-4">
+                <button id="prev-btn" class="px-6 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    Previous
+                </button>
+                <button id="next-btn" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    Next
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The Image Modal for Zooming -->
+    <div id="image-modal" class="image-modal">
+        <span id="image-modal-close" class="image-modal-close">&times;</span>
+        <img class="image-modal-content" id="modal-image-content">
+    </div>
+
+    <script>
+        // --- IMAGE FILENAME ISSUE ---
+        // If images show "Image Not Available", it's because the filename here does not EXACTLY
+        // match the filename in your folder.
+        //
+        // HOW TO FIX:
+        // 1. Look at your image files in your folder.
+        // 2. Check the full name, including the extension (e.g., ".jpg", ".jpeg", or ".png").
+        // 3. Make sure the name in the `image:` property below matches your file PERFECTLY.
+        //    For example, if your file is named "Screenshot 2025-07-24 162009.jpeg", you must
+        //    change "Screenshot 2025-07-24 162009.jpg" to "Screenshot 2025-07-24 162009.jpeg" below.
+        const steps = [
+            {
+                title: "Access the Services Platform",
+                instruction: "First, log in to the BUniPort. From the main 'Works' bar, find and click on the 'Students and Staff Services Platform' to get started.",
+                image: "Screenshot 2025-07-24 162009.png",
+                alt: "Screenshot of BUniPort showing the location of the Students and Staff Services Platform button."
+            },
+            {
+                title: "Navigate to the Finance Office Section",
+                instruction: "On the services platform page, locate the 'Services & Application Forms' area. Click on the 'FO (Finance Office)' icon.",
+                image: "Screenshot 2025-07-24 162025.png",
+                alt: "Screenshot of the services platform highlighting the FO (Finance Office) icon."
+            },
+            {
+                title: "Find the Registration Form",
+                instruction: "You will see a list of popular items. Click on the first box, labeled 'Student Helper Information Registration Form' (新生兼職工信息登記表格).",
+                image: "Screenshot 2025-07-24 162110.png",
+                alt: "Screenshot showing the list of forms, with the Student Helper form highlighted."
+            },
+            {
+                title: "Complete Your Personal Details",
+                instruction: "Carefully fill in all the required fields in Section A with your personal information. Ensure all details are accurate.",
+                image: "Screenshot 2025-07-24 162121.png",
+                alt: "Screenshot of the personal information section of the registration form."
+            },
+            {
+                title: "Choose and Prepare MPF Scheme Form",
+                instruction: "In Section B, you must select one MPF Scheme. Download the required enrolment form by clicking the 'here' link, fill it out, and save it. You will need to upload this completed form later.",
+                image: "Screenshot 2025-07-24 162153_1.png",
+                alt: "Screenshot highlighting the MPF scheme selection and download link."
+            },
+            {
+                title: "Upload Documents and Submit",
+                instruction: "In Section C, check the box to confirm you have the completed MPF form. Upload the form and any other required documents. Finally, click the 'Submit' (提交) button in the top right corner to complete the process.",
+                image: "Screenshot 2025-07-24 162153.png", 
+                alt: "Screenshot showing the document upload section and the final submit button."
+            }
+        ];
+
+        let currentStep = 0;
+        const guideContainer = document.getElementById('guide-container');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const stepCounter = document.getElementById('step-counter');
+        
+        // Modal elements
+        const modal = document.getElementById('image-modal');
+        const modalImg = document.getElementById('modal-image-content');
+        const closeModalBtn = document.getElementById('image-modal-close');
+
+        function renderSteps() {
+            guideContainer.innerHTML = ''; // Clear previous steps
+            steps.forEach((step, index) => {
+                const stepEl = document.createElement('div');
+                stepEl.id = `step-${index}`;
+                stepEl.className = 'step w-full';
+                stepEl.innerHTML = `
+                    <div class="flex flex-col lg:flex-row gap-8">
+                        <div class="lg:w-1/2">
+                            <h2 class="text-xl md:text-2xl font-bold text-gray-800">${index + 1}. ${step.title}</h2>
+                            <p class="mt-4 text-gray-600 leading-relaxed">${step.instruction}</p>
+                        </div>
+                        <div class="lg:w-1/2">
+                             <img src="${step.image}" 
+                                 alt="${step.alt}" 
+                                 class="guide-image rounded-lg shadow-lg border border-gray-200 w-full h-auto object-contain"
+                                 onerror="this.onerror=null;this.src='https://placehold.co/600x400/e2e8f0/4a5568?text=Image+Not+Available';">
+                        </div>
+                    </div>
+                `;
+                // Add click listener for the zoom modal
+                const imgEl = stepEl.querySelector('.guide-image');
+                imgEl.addEventListener('click', function() {
+                    modal.style.display = "block";
+                    modalImg.src = this.src;
+                });
+
+                guideContainer.appendChild(stepEl);
+            });
+            updateView();
+        }
+
+        function updateView() {
+            document.querySelectorAll('.step').forEach((el, index) => {
+                if (index === currentStep) {
+                    el.classList.remove('hidden-step');
+                    el.classList.add('visible-step');
+                } else {
+                    el.classList.add('hidden-step');
+                    el.classList.remove('visible-step');
+                }
+            });
+
+            prevBtn.disabled = currentStep === 0;
+            nextBtn.disabled = currentStep === steps.length - 1;
+
+            if(currentStep === steps.length - 1) {
+                nextBtn.innerText = "Finish";
+            } else {
+                nextBtn.innerText = "Next";
+            }
+            stepCounter.textContent = `Step ${currentStep + 1} of ${steps.length}`;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                updateView();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateView();
+            }
+        });
+
+        // Close the modal
+        closeModalBtn.addEventListener('click', () => {
+            modal.style.display = "none";
+        });
+        
+        modal.addEventListener('click', (e) => {
+             if (e.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+
+
+        // Initial render
+        window.onload = renderSteps;
+    </script>
+
+</body>
+</html>
